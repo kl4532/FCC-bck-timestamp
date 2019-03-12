@@ -1,7 +1,3 @@
-// server.js
-// where your node app starts
-
-// init project
 var express = require('express');
 var app = express();
 
@@ -17,13 +13,31 @@ app.use(express.static('public'));
 app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
-
-
-// Path and solution 
-app.get("/api/whoami", function (req, res) {
-  res.json({ip: req.ip, language: req.headers["accept-language"], software: req.headers['user-agent']});
+ 
+// Start of Corny changes
+app.get("/api/timestamp/", function (req, res) { // when user do not specify any date
+  res.json(new Date());
 });
-
+app.get("/api/timestamp/:date_string", function (req, res) { // when user specify smth
+  let result,time;
+  let date = req.params.date_string;
+  let patt = /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/;
+  if(patt.test(date)){ // for date in yyyy-mm-dd format
+    time = new Date(date); 
+    result ={
+      "unix": time.getTime(), // timestamp in milsec
+      "utc": time.toUTCString()
+    };
+  }else{
+    time = new Date(date*1000); // convert to milsec to use Dete method
+    result = {
+      "unix": time.getTime(), // timestamp in milsec
+      "utc": time.toUTCString()
+    }
+  }
+  res.json(result);
+});
+// END of Corny changes
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
